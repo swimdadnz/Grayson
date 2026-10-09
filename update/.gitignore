@@ -1,0 +1,13 @@
+# The private workbook and acquisition archives contain swimmers' DOBs/source details.
+# Keep them on your LOCAL checkout or in a separate PRIVATE repository.
+/Grayson_Swim_Site_Master.xlsx
+/input/*.xlsx
+/archive/
+/generated_data/
+/incoming_records/*.pdf
+/incoming_records/*_APPLIED_*.csv
+/scripts/swimcloud_*output_update_*/
+/scripts/SwimCloud_*Output_update_*.zip
+/scripts/*_output_update_*/
+/scripts/*_Output_update_*.zip
+/input/latest_*_zip.txt
