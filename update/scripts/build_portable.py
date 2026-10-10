@@ -490,3 +490,8 @@ for file in ['index.html','nz-records.html','progression.html','consistency.html
 
 # The root README is an operator-maintained document. Never overwrite it during rebuild.
 print('Generated',OUT)
+
+# Regenerate World Aquatics standards, PB workbook analysis and the new portable page.
+# Uses the same build date; no external URLs are fetched when building.
+import subprocess, sys
+subprocess.run([sys.executable,str(UPDATE/'scripts/build_personal_bests.py')],check=True,env={**os.environ,'SITE_BUILD_DATE':NOW.isoformat()})
