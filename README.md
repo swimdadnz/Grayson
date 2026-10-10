@@ -5,10 +5,11 @@ Update toolkit: edition 1
 QUICK START / VIEWING THE WEBSITE
 ---------------------------------
 Double-click index.html after extracting the ZIP. The site is fully offline:
-index.html, nz-records.html, progression.html, consistency.html and assets/.
-The four site pages do NOT read the Excel workbook and do NOT need an
+index.html, nz-records.html, progression.html, consistency.html,
+personal-bests.html and assets/.
+The five site pages do NOT read the Excel workbook and do NOT need an
 internet connection. Keep the assets folder intact. Public GitHub Pages
-can serve the four HTML files and assets directly from the repository root.
+can serve the five HTML files and assets directly from the repository root.
 
 MEDIA GALLERY (INCLUDED IN THIS PATCH)
 --------------------------------------
@@ -42,6 +43,8 @@ Everything needed for LOCAL updates is packaged in the update/ subfolder:
   update/scripts/import_record_changes.py   reviewed NZ record changes/rollover
   update/scripts/update_master.py           import swim history and recalculate
   update/scripts/build_portable.py          rebuild standalone offline site
+  update/scripts/build_personal_bests.py     recompute PBs/World Aquatics comparisons
+  update/input/world_aquatics_standards.csv  published championship A/B standards (SCM and LCM)
   update/source_templates/                  HTML source layout for rebuilding
   update/UPDATE_SITE.bat                     full Windows workflow
   update/REBUILD_NO_ACQUISITION.bat          records/analysis only
@@ -136,7 +139,7 @@ HOW TO REFRESH THE SITE IN THE FUTURE
    e. opens Chrome/Edge for BOTH Grayson profiles; you again clear
       Cloudflare and PRESS ENTER to retrieve all listed events;
    f. recalculates the workbook and generates fresh internal JSON;
-   g. rewrites the four offline HTML files in the REPOSITORY ROOT,
+   g. rewrites the five offline HTML files in the REPOSITORY ROOT,
       including record leaderboards, next-fastest margins, progression,
       consistency, heat maps and new page creation date.
    The browser acquisition installs no Chrome extensions, Playwright or
@@ -173,7 +176,7 @@ HOW TO REFRESH THE SITE IN THE FUTURE
    - Open the site locally (file://) and, ideally, test on a phone as well.
    - Check all ten photographs and the embedded MP4 player.
 
-9) GitHub Pages publication: commit ONLY the four updated HTML files,
+9) GitHub Pages publication: commit ONLY the five updated HTML files,
    assets/ and non-sensitive update scripts/README (optionally the public
    source_templates folder). Leave workbook, raw ZIPs, DOB roster, and
    archive files outside the PUBLIC Git history. Upload/push and view the
@@ -206,3 +209,48 @@ update/scripts/build_portable.py have changed. Two JPEGs and one MP4 are new.
 The NZ Records, Progression and Consistency pages, existing eight photos,
 Excel master database and acquisition scripts have NOT changed. You can
 apply only the files in this patch to an existing v5 GitHub repository.
+
+PERSONAL BESTS PAGE - ADDED OCTOBER 2026
+--------------------------------------
+Public file: personal-bests.html. The Home navigation links to it without
+changing the three feature cards on the landing page. The table covers:
+- LCM: 50/100/200/400 Free, 50/100 Fly, 200 IM (7 events).
+- SCM: 50/100/200/400 Free, 50/100 Fly, 100/200 IM (8 events).
+It uses the fastest legal performance for Grayson from 04_Swims, including
+valid relay lead-offs, across BOTH SwimCloud profiles. Equal PBs display
+the first recorded date and meet. Times are course-specific and never
+converted between SCM and LCM. If a new meet appears in the SwimCloud
+acquisition, the fastest qualifying time is selected when the page rebuilds.
+
+Published World Aquatics benchmarks (men's individual events):
+- LCM: World Aquatics Championships Budapest 2027, 50m qualifying A/B.
+  https://mediamanager.ws/media/pages/s/swimmsvk.sk/2026/06/sw-qualification-world-aquatics-championships-budapest-2027.pdf
+- SCM: World Aquatics Swimming Championships Beijing 2026 (25m) A/B.
+  https://resources.fina.org/fina/document/2026/02/16/2bee1e7b-bb50-4d97-855a-650661073eb0/Qualification-World-Aquatics-Swiming-Championships-25m-Beijing-2026.pdf
+A/B columns use standards for the SAME course as the swimmer's PB.
+Gap = (PB seconds / published standard seconds - 1) * 100; positive is
+slower than the benchmark, negative is faster. Championship standards
+are NOT age-specific, and achievement of a standard is not automatic
+selection or official qualification. Approved meet and qualifying period
+requirements apply.
+
+For each future refresh:
+1. Run the existing Windows acquisition and update process; the
+   `build_portable.py` step calls `build_personal_bests.py` automatically.
+   No extra interactive SwimCloud acquisition is needed for this page.
+2. Confirm `A_Personal_Bests` and `World_Aquatics_Standards` appear in the
+   PRIVATE master workbook and compare any recent PB dates/meets with
+   the imported SwimCloud records. The new page is always built offline.
+3. If World Aquatics publishes new A/B standards for either course,
+   manually update `update/input/world_aquatics_standards.csv`, including
+   the championship name, source URL, and qualifying period. The next
+   rebuild updates both the workbook and page. Do not silently reuse
+   obsolete entry standards for a different championship.
+4. Publish `personal-bests.html` along with `index.html` whenever their
+   output changes. Do not publish the private workbook or any source CSV
+   containing private swimmer information.
+
+The PB spreadsheet audit columns use Excel formulas pointing to source
+rows in 04_Swims, plus a separate World_Aquatics_Standards input sheet.
+Excel recalculates formula outputs on open. The public HTML is computed
+directly from numeric race times so it works under file:// without Excel.
