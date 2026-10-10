@@ -254,3 +254,38 @@ The PB spreadsheet audit columns use Excel formulas pointing to source
 rows in 04_Swims, plus a separate World_Aquatics_Standards input sheet.
 Excel recalculates formula outputs on open. The public HTML is computed
 directly from numeric race times so it works under file:// without Excel.
+
+
+PROGRESSION: AGE-YEAR SEASON BESTS
+--------------------------------
+The Progression page compares age-year bests for Grayson and the selected
+swimmer in the event selected above the chart (ages 11 through 20).
+This is NOT a calendar-year or standard swimming-season definition: an
+age-year runs from one birthday until the next. Exact age is calculated
+privately from DOB and swim date and is already present in the generated
+progression JSON as the decimal age. The lowest valid time from each age
+interval is displayed. Missing coverage appears as "-", not as zero.
+Percentage difference = (Grayson / selected - 1) * 100. Positive means
+Grayson is slower; negative means faster. Comparing Grayson with himself
+gives 0.00% where data exist.
+
+The table and chart use the SAME acquisition and swimmer profile mapping.
+No new master workbook column or extra script is needed. Every rebuild
+reads update/source_templates/progression.html and replaces the embedded
+progressionData with the latest generated_data/progression.json; the
+age-year table updates from those records automatically.
+
+FIVE-PAGE NAVIGATION AND PERSONAL BESTS TEMPLATE
+-----------------------------------------------
+NZ Records, Progression and Consistency now link to Personal bests in the
+header, matching the existing links on Home and Personal bests. The
+source_templates copies are updated so the links survive site refreshes.
+The Personal bests page now also has its own source template at:
+  update/source_templates/personal-bests.html
+The build_personal_bests.py script reads that template, preserving its
+layout and navigation while replacing the LCM/SCM tables, standards
+methodology, refresh dates and footer on each rebuild. Do not edit the
+public personal-bests.html alone if you intend the change to persist.
+
+This changes-only release also includes the previously uncommitted
+Progression season-bests table and its matching source template.
