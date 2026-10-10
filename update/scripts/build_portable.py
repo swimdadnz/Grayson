@@ -15,6 +15,7 @@ import shutil
 from pathlib import Path
 from bs4 import BeautifulSoup
 from openpyxl import load_workbook
+from name_aliases import canonical_name, canonical_holders
 
 UPDATE=Path(__file__).resolve().parents[1]
 BASE=UPDATE.parent
@@ -88,7 +89,7 @@ for tup in source_rows:
  key,course,sex,age,event,holder=tup[:6]
  if not key: continue
  if not (sex in ('Male','Female') and course in ('SCM','LCM') and age in range(13,19)):continue
- holders=[] if not holder or str(holder).strip().lower()=='standard' else [p.strip() for p in str(holder).split(' / ') if p.strip()]
+ holders=canonical_holders(holder)
  holders=list(dict.fromkeys(holders)) # same person repeated gets only one record
  day=parse_day(tup[10]);
  records.append(dict(key=key,course=course,sex=sex,age=age,event=event,holder=holder,
@@ -100,6 +101,39 @@ held=[r for r in records if r['holders']]
 assert len(held)>=400
 by_gender={s:[r for r in held if r['sex']==s] for s in ['Male','Female']}
 assert all(len(v)>0 for v in by_gender.values())
+
+# Birthdate is private or unknown for most record holders. Estimate age at refresh
+# from the age they held at an event and the actual record date; intersect the
+# inferred birth-date intervals across multiple records when consistent.
+# A source can use calendar-year age classifications, producing contradictions;
+# in such cases use the latest dated record and flag it as approximate.
+def shift_years(day,n):
+ try:return day.replace(year=day.year-n)
+ except ValueError:return day.replace(year=day.year-n,day=28)
+
+def whole_years_since(birth,on):
+ return on.year-birth.year-((on.month,on.day)<(birth.month,birth.day))
+
+age_sources=collections.defaultdict(list)
+for rec in held:
+ if not rec['recordDate']:continue
+ d=dt.date.fromisoformat(rec['recordDate'])
+ for name in rec['holders']:age_sources[(rec['sex'],name)].append((rec['age'],d))
+
+def estimate_current_age(sex,name):
+ observations=age_sources.get((sex,name),[])
+ if not observations:return {'estimatedAge':None,'ageRange':'unknown','ageStatus':'unknown','ageBasis':'No valid record dates'}
+ starts=[shift_years(d,age+1)+dt.timedelta(days=1) for age,d in observations]
+ ends=[shift_years(d,age) for age,d in observations]
+ low=max(starts);high=min(ends)
+ coherent=low<=high
+ if not coherent:
+  age,latest=max(observations,key=lambda x:x[1]);low=shift_years(latest,age+1)+dt.timedelta(days=1);high=shift_years(latest,age)
+ middle=low+dt.timedelta(days=(high-low).days//2)
+ a=whole_years_since(high,NOW);b=whole_years_since(low,NOW);middleage=whole_years_since(middle,NOW)
+ label=str(a) if a==b else f'{a}–{b}'
+ status='eligible' if b<=18 else ('ineligible' if a>=19 else 'borderline')
+ return {'estimatedAge':middleage,'ageRange':label,'ageStatus':status,'ageBasis':'Age-group record dates; approximate'+(' (conflicting age conventions)' if not coherent else '')}
 
 # Rebuild the record leaderboards from the updated workbook rather than reusing frozen v4 JSON.
 def parse_seconds(value):
@@ -118,7 +152,7 @@ def recalc_leaderboard(sex):
  for position,(name,scm,lcm) in enumerate(ordered,1):
   total=scm+lcm
   rank=last_rank if last_total==total else position
-  result.append({'swimmer':name,'scm':scm,'lcm':lcm,'total':total,'rank':rank})
+  result.append({'swimmer':name,'scm':scm,'lcm':lcm,'total':total,'rank':rank,**estimate_current_age(sex,name)})
   last_total=total;last_rank=rank
  return result
 
@@ -130,7 +164,7 @@ def recalc_outstanding(sex):
   if not next_name or not next_time:continue
   first,second=parse_seconds(record_time),parse_seconds(next_time)
   if first is None or second is None or second<=0 or first>second:continue
-  result.append({'swimmer':tup[5],'event':tup[4],'course':tup[1],'age':tup[3],
+  result.append({'swimmer':' / '.join(canonical_holders(tup[5])),'event':tup[4],'course':tup[1],'age':tup[3],
                  'recordTime':str(record_time),'nextFastestSwimmer':str(next_name),
                  'nextFastestTime':str(next_time),'marginPct':round(100*(second-first)/second,4),
                  'recordKey':tup[0]})
@@ -373,18 +407,46 @@ for file in ['index.html','nz-records.html','progression.html','consistency.html
   add_css(soup,media_css+record_css)
   add_script(soup,video_js)
  elif file=='nz-records.html':
-  add_css(soup,record_css)
+  age_css="""
+/* Progressive disclosure of lower record counts, age estimates and responsive details */
+.records-more{margin-top:16px;border:1px solid #d9e2ed;border-radius:10px;overflow:hidden;background:#fff}
+.records-more summary{cursor:pointer;padding:16px 18px;background:#edf3f8;font-weight:800;color:#0b2b4c;list-style-position:inside;min-height:48px}
+.records-more summary:hover,.records-more summary:focus-visible{background:#e5eef7;outline-color:#e0bf17}
+.records-more[open] summary{border-bottom:1px solid #d9e2ed}
+.records-more .table-wrap{margin:0;border:0;box-shadow:none}
+.age-col{min-width:76px;white-space:nowrap}
+.age-marker{font-variant-numeric:tabular-nums;font-weight:800}
+.age-marker.eligible{color:#126438}.age-marker.ineligible{color:#667085}.age-marker.borderline{color:#80570c}
+@media(max-width:680px){.age-col{min-width:67px}.records-more summary{font-size:.9rem}}
+"""
+  add_css(soup,record_css+age_css)
+  # Update the explanatory copy without changing the underlying historical record definitions.
+  intro=soup.find('section',class_='section')
+  # Description is inserted next to the leaderboard heading, not into a heatmap.
+  candidate=next((x for x in soup.find_all('h2') if x.get_text(' ',strip=True)=='Who holds the most?'),None)
+  if candidate:
+   note=soup.new_tag('p',attrs={'class':'recency-intro record-age-explainer'})
+   note.string='Only swimmers holding five or more records are shown initially; expand either table to see the others. Estimated ages are inferred from record age groups and dates, so they are approximate. Swimmers aged 18 or younger may still add age-group records; older swimmers can no longer add age-group records, although their rank may occasionally improve if swimmers above them lose records.'
+   candidate.insert_after(note)
   # Replace static rendering helper so swimmer names in both leaderboards are actual buttons.
   scripts=soup.find_all('script')
   original=scripts[-1].string or ''
   original=original.replace('const recordsData={','const recordsData={',1)
-  old_count='''<td class="rank">${r.rank}</td><td>${esc(r.swimmer)}</td>'''
-  replacement='''<td class="rank">${r.rank}</td><td><button type="button" class="swimmer-open" data-sex="${rows===recordsData.counts.male?'Male':'Female'}" data-swimmer="${esc(r.swimmer)}" aria-label="List current records for ${esc(r.swimmer)}">${esc(r.swimmer)}</button></td>'''
-  if old_count not in original:
-   # locate exact renderer in existing minified JS
-   match=re.search(r'function countTable\(rows\).*?\nfunction topTable',original,re.S)
-   print('Existing countTable snippet:',(match.group(0)[:1000] if match else 'MISSING'))
-  else:original=original.replace(old_count,replacement)
+  # Display five-record holders by default, with a per-sex disclosure for all others.
+  block_start=original.index('function countTable(')
+  block_end=original.index('function topTable(',block_start)
+  count_renderer=r'''function countTable(rows){
+  const sex=rows===recordsData.counts.male?'Male':'Female';
+  const primary=rows.filter(r=>r.total>=5),others=rows.filter(r=>r.total<5);
+  const table=(data)=>`<div class="table-wrap"><table><thead><tr><th>Rank</th><th>Swimmer</th><th class="num age-col">Est. age</th><th class="num">SCM</th><th class="num">LCM</th><th class="num">Total</th></tr></thead><tbody>${data.map(r=>{
+    const age=r.estimatedAge==null?'—':'≈'+r.estimatedAge;
+    const tip=r.ageStatus==='eligible'?'Likely still eligible to set age-group records':r.ageStatus==='ineligible'?'Likely aged beyond the 18-year record groups':r.ageStatus==='borderline'?'Age eligibility uncertain near the 18/19-year boundary':'Age unavailable';
+    return `<tr class="${r.swimmer==='Grayson Coulter'?'highlight-row':''}"><td class="rank">${r.rank}</td><td><button type="button" class="swimmer-open" data-sex="${sex}" data-swimmer="${esc(r.swimmer)}" aria-label="List current records for ${esc(r.swimmer)}">${esc(r.swimmer)}</button></td><td class="num age-col" title="${esc(tip)} · ${esc(r.ageBasis)} · estimated range ${esc(r.ageRange)}"><span class="age-marker ${esc(r.ageStatus)}">${age}</span></td><td class="num">${r.scm}</td><td class="num">${r.lcm}</td><td class="num"><strong>${r.total}</strong></td></tr>`;
+  }).join('')}</tbody></table></div>`;
+  return table(primary)+(others.length?`<details class="records-more"><summary>Show ${others.length} more ${sex.toLowerCase()} swimmers with fewer than 5 records</summary>${table(others)}</details>`:'');
+}
+'''
+  original=original[:block_start]+count_renderer+original[block_end:]
   # Correct the top20 table's own sex lookup if its HTML was transformed by countTable replacement.
   a=original.index('function topTable(')
   b=original.index('const d=recordsData;',a)

@@ -10,6 +10,7 @@ import csv
 from datetime import datetime, date
 from pathlib import Path
 from openpyxl import load_workbook
+from name_aliases import canonical_name, canonical_holders
 
 ROOT=Path(__file__).resolve().parents[1]
 WORKBOOK=ROOT/'Grayson_Swim_Site_Master.xlsx'
@@ -32,7 +33,7 @@ def stamp(v):
     raise ValueError('Use a genuine swim date YYYY-MM-DD, got '+repr(s))
 
 def holder_names(s):
-    return [v.strip() for v in str(s or '').split(' / ') if v.strip() and v.strip().lower()!='standard']
+    return canonical_holders(s)
 
 def main():
     ap=argparse.ArgumentParser()
@@ -79,7 +80,7 @@ def main():
         print('No net changes; workbook untouched.')
         return
     for d,nr,old_h,old_t,when in changes:
-        k=d['Record Key']; new_h=d['New Holder'];new_t=d['New Time'];before=holder_names(old_h);after=holder_names(new_h)
+        k=d['Record Key']; new_h=" / ".join(canonical_holders(d['New Holder']));new_t=d['New Time'];before=holder_names(old_h);after=holder_names(new_h)
         new_runner=None;new_runner_time=None
         if len(after)>1:
             new_runner=after[1];new_runner_time=new_t
@@ -87,12 +88,12 @@ def main():
             # One different swimmer takes the record: displaced record is the next fastest.
             if len(before)!=1:
                 raise ValueError('Former joint record needs manual next-fastest verification '+k)
-            new_runner=before[0];new_runner_time=old_t
+            new_runner=canonical_name(before[0]);new_runner_time=old_t
         if d['Next Fastest Name'] or d['Next Fastest Time']:
             # Explicit reviewed comparator wins over inferred runner-up.
             if not (d['Next Fastest Name'] and d['Next Fastest Time']):
                 raise ValueError('Both comparator name and time are required '+k)
-            new_runner=d['Next Fastest Name'];new_runner_time=d['Next Fastest Time']
+            new_runner=canonical_name(d['Next Fastest Name']);new_runner_time=d['Next Fastest Time']
         if after and new_runner in after and len(after)==1:
             raise ValueError('Next fastest cannot be same swimmer as sole record holder '+k)
         for hr in range(5,history.max_row+1):
@@ -102,7 +103,7 @@ def main():
         history.cell(hh,1).value='H'+str(hh-4).zfill(4)
         for i,v in enumerate([k,rws.cell(nr,2).value,rws.cell(nr,3).value,rws.cell(nr,4).value,rws.cell(nr,5).value,new_h,new_t,when,None,'YES',d['Source URL']],start=2):
             history.cell(hh,i).value=v
-        rws.cell(nr,6).value=new_h;rws.cell(nr,9).value=new_t;rws.cell(nr,9).number_format='@'
+        rws.cell(nr,6).value=new_h;rws.cell(nr,7).value=after[0] if after else None;rws.cell(nr,8).value=after[1] if len(after)>1 else None;rws.cell(nr,9).value=new_t;rws.cell(nr,9).number_format='@'
         rws.cell(nr,11).value=when;rws.cell(nr,12).value='Swimming NZ record update - reviewed'
         if d['Source URL']:rws.cell(nr,13).value=d['Source URL']
         rws.cell(nr,14).value='YES' if len(after)>1 else 'NO'

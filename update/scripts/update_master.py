@@ -5,6 +5,7 @@ from collections import defaultdict,Counter
 import argparse,json,zipfile,tempfile,shutil,re,math,os
 from copy import copy
 from openpyxl import load_workbook
+from name_aliases import canonical_name, canonical_holders
 import numpy as np
 from scipy.optimize import curve_fit
 from scipy.interpolate import UnivariateSpline
@@ -82,7 +83,7 @@ def public(wb):
             pts=sorted([x for x in rec if x['name']==p['name'] and x['event_id']==eid and x['legal'] and x['age']<21],key=lambda x:(x['date'],x['rorder'],x['row'])); arr.append({'id':p['id'],'name':p['name'],'group':p['group'],'points':[{'age':round(x['age'],4),'timeSeconds':x['time'],'timeDisplay':fmt(x['time']),'meet':x['meet'],'round':x['round'],'relayLeadOff':x['relay'],'year':x['date'].year} for x in pts]})
         series[k]=arr
     (DATA/'progression.json').write_text(json.dumps({'asOf':asof,'status':'ready','ageScope':'performances before exact age 21.0 (through age 20)','swimmers':[{'id':p['id'],'name':p['name'],'group':p['group'],'sourceProfiles':prof[p['name']]} for p in people if p['public']],'events':[{'course':c,'event':e,'key':f'{c}|{e}'} for c,e,_ in req],'series':series,'notes':['Grayson Coulter combines two SwimCloud profiles into one canonical swimmer.','Public JSON omits dates of birth. Exact ages are calculated privately using 365.2425 days per year.']},indent=2),encoding='utf-8')
-    (DATA/'consistency.json').write_text(json.dumps({'asOf':asof,'status':'ready','analysisStart':'2024-01-01','summary':summary,'trends':trends,'modelCandidates':MODELS,'scopeNote':'Top-5/Top-10 counts cover every Grayson event/course captured since 1 January 2024. Trend charts remain limited to the eight requested event-course combinations.','dataNotes':['Equal times are not counted as faster.','Relay lead-offs are treated as valid event swims.']},indent=2),encoding='utf-8')
+    (DATA/'consistency.json').write_text(json.dumps({'asOf':asof,'status':'ready','analysisStart':'2024-01-01','summary':[{k:v for k,v in r.items() if k not in ('top5','top5Pct')} for r in summary],'trends':trends,'modelCandidates':MODELS,'scopeNote':'Top-10 counts cover every Grayson event/course captured since 1 January 2024. Trend charts remain limited to the eight requested event-course combinations.','dataNotes':['Equal times are not counted as faster.','Relay lead-offs are treated as valid event swims.']},indent=2),encoding='utf-8')
     # records from workbook
     rb=wb['05_Record_Benchmarks']; counts={'male':defaultdict(lambda:{'SCM':0,'LCM':0}),'female':defaultdict(lambda:{'SCM':0,'LCM':0})}; tops={'male':[],'female':[]}
     def sec(v):
@@ -91,9 +92,9 @@ def public(wb):
     for r in range(5,rb.max_row+1):
         key,c,sx,ag,e,h=[rb.cell(r,z).value for z in range(1,7)]; rt=rb.cell(r,9).value; nxt=rb.cell(r,16).value; nt=rb.cell(r,17).value
         if h and h!='Standard':
-            for n in str(h).split(' / '): counts[str(sx).lower()][n.strip()][c]+=1
+            for n in canonical_holders(h): counts[str(sx).lower()][n][c]+=1
         a,b=sec(rt),sec(nt); mar=(b-a)/b*100 if a is not None and b else None
-        if rb.cell(r,15).value=='YES' and nxt and mar is not None: tops[str(sx).lower()].append({'swimmer':h,'event':e,'course':c,'age':ag,'recordTime':rt,'nextFastestSwimmer':nxt,'nextFastestTime':nt,'marginPct':round(mar,4),'recordKey':key})
+        if rb.cell(r,15).value=='YES' and nxt and mar is not None: tops[str(sx).lower()].append({'swimmer':' / '.join(canonical_holders(h)),'event':e,'course':c,'age':ag,'recordTime':rt,'nextFastestSwimmer':canonical_name(nxt),'nextFastestTime':nt,'marginPct':round(mar,4),'recordKey':key})
     oc={}
     for sx,d in counts.items():
         arr=[{'swimmer':n,'scm':v['SCM'],'lcm':v['LCM'],'total':v['SCM']+v['LCM']} for n,v in d.items()]; arr.sort(key=lambda x:(-x['total'],-x['scm'],-x['lcm'],x['swimmer'])); last=None; rk=0
@@ -146,13 +147,46 @@ def _copy_style(ws,src,dst,maxcol):
         ws.cell(dst,c).number_format=ws.cell(src,c).number_format
         ws.cell(dst,c).alignment=copy(ws.cell(src,c).alignment)
 
+def refresh_record_count_sheet(wb):
+    """Rebuild canonical record holder roster and Excel formulas on every refresh.
+
+    Prevent duplicate historical aliases and ensure newly emerging holders appear.
+    One row per canonical name; tied records credited once to each named holder.
+    """
+    rb=wb['05_Record_Benchmarks'];counts=defaultdict(lambda:[0,0])
+    for r in range(5,rb.max_row+1):
+        if not rb.cell(r,1).value: continue
+        gender=rb.cell(r,3).value;course=rb.cell(r,2).value
+        if gender not in ('Male','Female') or course not in ('SCM','LCM'): continue
+        holders=canonical_holders(rb.cell(r,6).value)
+        rb.cell(r,7).value=holders[0] if holders else None
+        rb.cell(r,8).value=holders[1] if len(holders)>1 else None
+        rb.cell(r,6).value=' / '.join(holders) if holders else 'Standard'
+        for swimmer in holders:counts[(gender,swimmer)][0 if course=='SCM' else 1]+=1
+    people=sorted(counts,key=lambda p:(0 if p[0]=='Male' else 1,-sum(counts[p]),-counts[p][0],p[1]))
+    ws=wb['A_Record_Counts']; last=max(ws.max_row,5+len(people)); final=4+len(people)
+    # Store source style before clearing worksheet cells.
+    for r in range(5,last+1):
+        for c in range(1,8):ws.cell(r,c).value=None
+    for r,(sex,swimmer) in enumerate(people,5):
+        if r>5:_copy_style(ws,5,r,7)
+        ws.cell(r,1).value=sex; ws.cell(r,2).value=swimmer
+        for c,course in ((3,'SCM'),(4,'LCM')):
+            ws.cell(r,c).value=(f'=COUNTIFS(05_Record_Benchmarks!$B:$B,"{course}",05_Record_Benchmarks!$C:$C,A{r},'
+                                 f'05_Record_Benchmarks!$G:$G,B{r})+COUNTIFS(05_Record_Benchmarks!$B:$B,"{course}",'
+                                 f'05_Record_Benchmarks!$C:$C,A{r},05_Record_Benchmarks!$H:$H,B{r})')
+        ws.cell(r,5).value=f'=C{r}+D{r}'
+        ws.cell(r,6).value=f'=1+COUNTIFS($A$5:$A${final},A{r},$E$5:$E${final},">"&E{r})'
+        ws.cell(r,7).value=f'=A{r}&"|"&TEXT(F{r},"000")&"|"&B{r}'
+
 def refresh_analysis_sheets(wb):
+    refresh_record_count_sheet(wb)
     people,prof,rec,gr,win,summary,req,trends=analyze(wb)
     # Consistency table: every captured Grayson event/course since 1 Jan 2024.
     ws=wb['A_Consistency']
     for r in range(5,ws.max_row+1):
         for c in range(1,ws.max_column+1): ws.cell(r,c).value=None
-    ws['A2']='Analysis starts 1 January 2024. The table covers every Grayson event/course captured in the all-event history; Top-5/Top-10 status is historical at the time of each race. Trend metrics are shown only for the eight requested chart events.'
+    ws['A2']='Analysis starts 1 January 2024. The table covers every Grayson event/course captured in the all-event history; Top-10 status is historical at the time of each race (Top-5 internal audit columns retained). Trend metrics are shown only for the eight requested chart events.'
     for i,a in enumerate(summary,start=5):
         if i>5:_copy_style(ws,5,i,14)
         c,e=a['course'],a['event']; ws.cell(i,1).value=c; ws.cell(i,2).value=e
