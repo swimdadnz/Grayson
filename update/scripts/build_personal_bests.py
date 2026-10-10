@@ -3,7 +3,7 @@
 
 Input:  update/Grayson_Swim_Site_Master.xlsx and input/world_aquatics_standards.csv
 Output: personal-bests.html and the workbook's A_Personal_Bests/World_Aquatics_Standards sheets.
-This is called by build_portable.py after each SwimCloud refresh. No DOB is published.
+This is called by build_portable.py after each SwimCloud refresh. Its HTML layout is retained from update/source_templates/personal-bests.html. No DOB is published.
 """
 from __future__ import annotations
 import csv
@@ -212,6 +212,26 @@ def build_html(standards,pbs):
  <p>Long-course A/B benchmarks are for <a href="{src_l}" target="_blank" rel="noopener noreferrer">Budapest 2027 (50m)</a>; short-course A/B benchmarks are for <a href="{src_s}" target="_blank" rel="noopener noreferrer">Beijing 2026 (25m)</a>. They are <strong>different competition standards</strong>. Official qualification also requires a swim in an approved meet during the specified qualifying period and selection by the federation; the presence of a faster historical PB alone does not establish eligibility.</p>
  <p>Personal bests include eligible individual swims and legal relay lead-offs, merged across both Grayson SwimCloud profiles. Where a PB was achieved more than once, the first recorded date is displayed. Figures are calculated from swims loaded in the master workbook as at {NOW:%d %B %Y}; this page updates only after the acquisition and rebuild process is run.</p></div></div></section>
  </main>{footer}</body></html>'''
+ # Preserve any deliberate source-template styling, navigation and content edits.
+ # Recalculate data-driven tables, the methodology's current standards, the
+ # site-build date and the footer from the new data on each rebuild.
+ template_path=ROOT/'source_templates/personal-bests.html'
+ if not template_path.is_file():
+  raise FileNotFoundError('Missing Personal bests source template: '+str(template_path))
+ template=BeautifulSoup(template_path.read_text(encoding='utf-8'),'html.parser')
+ generated=BeautifulSoup(body,'html.parser')
+ for selector in ('section#lcm','section#scm','.pb-method','footer'):
+  existing=template.select_one(selector)
+  replacement=generated.select_one(selector)
+  if existing is None or replacement is None:
+   raise RuntimeError('Missing Personal bests rebuild anchor '+selector)
+  existing.replace_with(replacement)
+ new_stamp=template.select_one('meta[name="site-build-date"]')
+ if new_stamp is None:
+  raise RuntimeError('Personal bests source template is missing build date metadata')
+ new_stamp['content']=NOW.isoformat()
+ # This is the rendered public file. Never publish the workbook or swimmer DOB.
+ body=str(template)
  (SITE/'personal-bests.html').write_text(body,encoding='utf-8')
  # Defensive checks for source/mismatch and sensitive DOB in the public export.
  assert '2012-01-17' not in body and '17 January 2012' not in body
