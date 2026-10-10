@@ -63,6 +63,25 @@ on the public GitHub Pages site. If you need cloud backup/versioning of the
 private files, use a separate PRIVATE GitHub repo or encrypted local backup.
 Do not force-add those sensitive files to a public repo.
 
+RECORD-LEADERBOARD PRESENTATION (THIS PATCH)
+-------------------------------------------
+The NZ Records page displays swimmers holding 5+ current NZ age-group
+records by default. Each gender's remaining swimmers are available using
+the Show-more disclosure directly below its leaderboard. All records are
+retained; the disclosure does NOT exclude lower-ranked swimmers from data.
+Estimated current age is calculated using the age group and record dates
+at the time of site generation, and may be approximate (especially if
+record sources use different age conventions). No date of birth is shared
+in the published HTML. Athletes beyond age 18 cannot add age-group records;
+their record count may be held or reduced, although rank can improve if
+other swimmers lose more records.
+The canonical name for 'Samuel Brown' is 'Sam Brown'. This is enforced
+by the workbook and update/scripts/name_aliases.py during future imports
+and HTML regeneration. All three current records are credited to Sam.
+The public Consistency page shows only historical Top-10 counts and rates;
+older Top-5 calculation columns remain available in private Excel sheets
+for audit purposes and are not included on the public website.
+
 HOW TO REFRESH THE SITE IN THE FUTURE
 -------------------------------------
 1) Obtain the latest Swimming NZ age-group SCM and LCM record books.
