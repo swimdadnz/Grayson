@@ -44,7 +44,7 @@ if errorlevel 1 goto :error
 python "scripts\build_portable.py"
 if errorlevel 1 goto :error
 echo.
-echo COMPLETE: check the four HTML files in the repository ROOT.
+echo COMPLETE: check the five HTML files in the repository ROOT.
 echo Check the record tables, current Top 20, dates, heatmaps, charts,
 echo media, and QA_Checks sheet before committing public files.
 pause
