@@ -11,3 +11,7 @@
 /scripts/*_output_update_*/
 /scripts/*_Output_update_*.zip
 /input/latest_*_zip.txt
+
+/input/profiles.csv
+/input/grayson_profiles.csv
+/input/Progression_comparison_swimmers.xlsx
