@@ -6,7 +6,7 @@ echo Grayson swim site - full data refresh
  echo ============================================================
 echo.
 echo This will: apply reviewed NZ record changes, then acquire
- echo the eight comparison events, then Grayson's complete history,
+ echo the eight events for active age-group stars, then Grayson's complete history,
 echo recalculate the private Excel workbook, and rebuild portable HTML.
 echo.
 echo IMPORTANT: Do not commit the private workbook to a PUBLIC GitHub repo.
@@ -22,7 +22,7 @@ echo Applying approved manual record changes, if any...
 python "scripts\import_record_changes.py"
 if errorlevel 1 goto :error
 echo.
-echo STEP 1: selected event histories for all comparison swimmers.
+echo STEP 1: selected event histories for current age-group stars only.
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File "%~dp0scripts\swimcloud_update.ps1"
 if errorlevel 1 goto :error
 if not exist "input\latest_selected_zip.txt" goto :error
