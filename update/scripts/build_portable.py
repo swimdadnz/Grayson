@@ -271,7 +271,7 @@ for r in held:
  heat_records.append(dict(sex=r['sex'],age=r['age'],bin=r['bin'],event=r['event'],course=r['course'],
                           holders=r['holders'],date=r['recordDate'],time=r['time']))
 max_count=max(sum(1 for r in heat_records if r['sex']==s and r['age']==age and r['bin']==b) for s in by_gender for age in range(13,19) for b,_ in bins)
-heat_html=['<section class="section" id="record-recency"><div class="wrap"><div class="eyebrow">How the record book evolves</div><h2>How old are today’s records?</h2><p class="recency-intro">Each square counts individual records in that age group and course combined (SCM + LCM), using the date the current record time was first set. Columns are measured backwards from the site build date of '+NOW.strftime('%-d %B %Y')+'. The darker the square, the more records in that recency period. Tap any square to see its events.</p><div class="heat-groups">']
+heat_html=['<section class="section" id="record-recency"><div class="wrap"><div class="eyebrow">How the record book evolves</div><h2>How old are today’s records?</h2><p class="recency-intro">Each square counts individual records in that age group and course combined (SCM + LCM), using the date the current record time was first set. Columns are measured backwards from the site build date of '+f'{NOW.day} {NOW:%B %Y}'+'. The darker the square, the more records in that recency period. Tap any square to see its events.</p><div class="heat-groups">']
 for sex,code in [('Male','male'),('Female','female')]:
  n=sum(1 for r in heat_records if r['sex']==sex)
  heat_html.append(f'<div class="heat-group"><h3>{sex} age-group records</h3><div class="heat-scroller" tabindex="0" role="region" aria-label="Scrollable {sex.lower()} record recency heat map"><table class="heat-table"><thead><tr><th scope="col">Age</th>')
@@ -390,8 +390,35 @@ def add_css(soup, css):
 def add_script(soup,script):
  n=soup.new_tag('script');n.string=script;soup.body.append(n)
 
+
+# QLD/AUS/unofficial-world record category snapshot, curated in update/input/other_record_categories.csv.
+# Read at each rebuild; this does not silently scrape or reclassify new records.
+def build_other_records_panel():
+ import csv
+ from collections import defaultdict
+ csvfile=UPDATE/'input'/'other_record_categories.csv'
+ groups=defaultdict(list)
+ with csvfile.open(encoding='utf-8-sig',newline='') as src:
+  for rr in csv.DictReader(src):
+   if rr.get('Category') not in ('QLD','AUS','WORLD'):raise ValueError('Unknown additional record category '+str(rr))
+   groups[rr['Category']].append(rr)
+ labels={'QLD':'Queensland All-Comers','AUS':'Australian All-Comers','WORLD':'World best times*'}
+ pieces=['<h3>More records worth remembering</h3><div class="other-grid">']
+ for key in ('QLD','AUS','WORLD'):
+  vals=sorted(groups[key],key=lambda r:(int(r['Age']),r['Event']))
+  pieces.append(f'<details><summary><span class="other-count">{len(vals)}</span><span class="other-label">{labels[key]}</span><span class="other-toggle">View individual records ↓</span></summary><div class="other-table-wrap"><table><thead><tr><th>Age</th><th>Event</th><th>Time</th><th>Swum</th></tr></thead><tbody>')
+  for r in vals:
+   pieces.append(f'<tr><td>{html.escape(r["Age"])}y</td><td>{html.escape(r["Event"])} {html.escape(r["Course"])}</td><td>{html.escape(r["Time"])}</td><td>{html.escape(r["Swim Date"])}</td></tr>')
+  pieces.append('</tbody></table></div></details>')
+ pieces.append('</div><p class="other-caption">Overlapping achievements: the same swim may count in several categories. These are <strong>additional record categories</strong>, not additional NZ age-group records. *International age bests are from a privately compiled listing, not official World Aquatics records. Review source books before altering totals; last verification dates are stored in the update CSV.</p>')
+ return ''.join(pieces)
+
 for file in ['index.html','nz-records.html','progression.html','consistency.html']:
  soup=BeautifulSoup((TEMPLATE/file).read_text(encoding='utf-8'),'html.parser')
+ if file=='index.html':
+  panel=soup.find(id='other-records-panel')
+  if panel is None: raise RuntimeError('Missing additional records panel in homepage template')
+  panel.clear();panel.append(BeautifulSoup(build_other_records_panel(),'html.parser'))
  footer=soup.find('footer').find(class_='wrap')
  footer.clear()
  footer.append(f'A summary of records and achievements as at {NOW.day} {NOW.strftime("%B %Y")}.')

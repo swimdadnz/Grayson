@@ -123,7 +123,9 @@ New-Item -ItemType Directory -Path $script:OutDir -Force | Out-Null
 $script:LogPath=Join-Path $script:OutDir 'acquisition_log.txt'
 Write-Log 'Starting SwimCloud API Acquisition v6 (slow/retry direct-event mode).'
 
-$profiles=Import-Csv -LiteralPath (Join-Path $base '..\input\profiles.csv')
+# Historical champions (Kyle, Flynn, Ian and the others) are a frozen dataset; do not poll them repeatedly.
+# The Grayson all-events acquisition is a separate step in UPDATE_SITE.bat.
+$profiles=@(Import-Csv -LiteralPath (Join-Path $base '..\input\profiles.csv') | Where-Object { $_.Group -eq 'Current age group star' })
 $events=@(
     [pscustomobject]@{Name='100 Free LCM';Key='1|100|L|1'},
     [pscustomobject]@{Name='200 Free LCM';Key='1|200|L|1'},
