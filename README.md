@@ -197,7 +197,7 @@ IMPORTANT LIMITATIONS / SOURCE DATA
 - The six trendline candidate models and residual statistics are descriptive,
   not predictions of eventual best performances.
 - After adding NEW swimmers to the roster, inspect the importer before
-  updating; the automated input maps the CURRENT 18 canonical swimmers.
+  updating; the automated input maps the CURRENT 19 canonical swimmers.
 - This update toolkit was tested for offline rebuild, but the Windows
   acquisition steps require a live authenticated browser and SwimCloud
   availability; those cannot be validated in this packaging environment.
@@ -289,3 +289,69 @@ public personal-bests.html alone if you intend the change to persist.
 
 This changes-only release also includes the previously uncommitted
 Progression season-bests table and its matching source template.
+
+OCTOBER 2026: HISTORICAL AUSTRALIAN COMPARISONS AND OTHER RECORD CATEGORIES
+--------------------------------------------------------------------------
+The progression database now includes three Australian historical swimmers
+with a one-off data reconciliation against Swimming Australia's boys' age
+all-time Top 10 lists, dated 28 August 2026 (LCM) and 24 September 2026 (SCM).
+These lists are age-specific Top 10 entries, NOT complete season histories.
+
+Source CSV: update/input/australian_historical_top10_verified.csv
+One-off importer: update/scripts/import_historical_top10_once.py
+Use the importer ONLY to apply corrections to the historical CSV; it matches
+swimmer + date + event/course + time and will not reinsert exact duplicates.
+65 published entries were evaluated: 2 matched already-acquired SwimCloud swims,
+63 were added. The workbook retains Swimming Australia as source for additions.
+Ian Thorpe has been added with SwimCloud profile https://www.swimcloud.com/swimmer/939756/times/
+and his correct date of birth in the PRIVATE workbook. This does not mean his
+entire SwimCloud racing history has been acquired or independently verified.
+Ages are computed privately from DOB and official swim dates. This does not
+change Grayson's own data or consistency calculations.
+
+On Progression, an age dropdown (11-20) now controls a ranked age-year table for
+the selected event/course. One fastest recorded swim per swimmer is ranked,
+including Grayson when he has an age-eligible result. Swimmers without times
+at that age are omitted from the ranking. The separate two-swimmer season-best
+comparison below the chart is retained. Missing data should never be treated
+as evidence that a swimmer did not swim that event.
+
+Historical champion data is considered fixed: the selected-events SwimCloud
+PowerShell acquisition now refreshes only current age-group stars. Grayson's
+two profiles continue to be refreshed separately by the all-events acquisition.
+The historical Australian Top-10 supplements are preserved in the master when
+the normal UPDATE_SITE.bat is run. Do not reacquire historical champions by
+routine. If a historical correction is needed, review the official source,
+change the historical CSV, run the one-time importer, then rebuild.
+
+Three additional categories are now displayed under NZ age-group record totals:
+ - Queensland All-Comers: 10
+ - Australian All-Comers: 3
+ - Unofficial international age bests: 3
+Each has an expandable table. Some swims qualify in multiple categories.
+The international age bests refer to Dominique Eisold's private collection,
+not World Aquatics-ratified records.
+
+Manual refresh process for QLD/AUS/world record categories:
+1. Check the newest official Queensland All-Comers and Australian All-Comers
+   record listings, and the international age-records website. Determine
+   whether Grayson still holds each mark and whether any new category record
+   has been set. Do not assume an old result remains current indefinitely.
+2. Edit update/input/other_record_categories.csv (one row per record-category
+   combination). Preserve the Category values QLD, AUS, or WORLD; enter the
+   event, course, age, official result time, swim date, source URL and date
+   verified. Do not confuse an Australian AGE record with an All-Comers record.
+3. Run update/REBUILD_NO_ACQUISITION.bat (or the full UPDATE_SITE.bat if new
+   SwimCloud results are also needed). build_portable.py reads the category
+   CSV directly; do not hard-code the homepage card numbers.
+4. Verify the public index.html totals and expanded lists against official
+   source documents, the NZ tables, and the private master before publishing.
+5. Keep update/Grayson_Swim_Site_Master.xlsx and input/profiles.csv (which
+   both contain date-of-birth data) out of PUBLIC GitHub history. Keep the
+   private update folder in a PRIVATE repository or an ignored local directory.
+
+Data limitations: published Australian historical lists are only Top-10 ages
+13-18; only the requested eight event/course combinations were included.
+Actual age-year rankings may be incomplete for historical champions. Ian
+Thorpe's full profile cannot currently be automatically scraped from this
+build environment. All calculations are descriptive, not predictive.
