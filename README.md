@@ -355,3 +355,55 @@ Data limitations: published Australian historical lists are only Top-10 ages
 Actual age-year rankings may be incomplete for historical champions. Ian
 Thorpe's full profile cannot currently be automatically scraped from this
 build environment. All calculations are descriptive, not predictive.
+
+SCM RATIFICATION + HISTORICAL QUEENSLAND AGE-12 SWIMS (15 OCT 2026)
+-----------------------------------------------------------------
+The supplied, RATIFIED Swimming New Zealand Short Course Record Book is dated
+6 October 2026. All 216 individual age-group records (ages 13-18, both genders)
+in that book have been reconciled against the master workbook: 216/216 record
+times and current holders match after normalising existing aliases such as
+Samuel Brown -> Sam Brown and Te Paki -> Te Rauroha Paki. No change to current
+NZ record counts, next-fastest comparators or record times was required.
+The master workbook now identifies the 6 October 2026 Swimming NZ list as
+the ratified reference, rather than relying on the earlier meet editorial
+report to confirm current records. The official reference PDF is retained in
+  update/incoming_records/Swimming_NZ_Short_Course_Records_as_at_2026-10-06.pdf
+and the 216-row audit transcription is in
+  update/input/ratified_scm_age_records_2026-10-06.csv
+Official current-record portal: https://www.swimmingnz.org/performance-and-coaching
+
+Five previously missing age-12 LCM performances from the 2024 Queensland
+Championships have been added to Grayson's PRIVATE 04_Swims dataset:
+  15 Dec 2024, 200 Free  1:54.40
+  16 Dec 2024, 100 Fly     58.52
+  16 Dec 2024, 200 IM   2:11.16
+  17 Dec 2024, 50 Free    24.52
+  18 Dec 2024, 100 Free   53.25
+These are sourced from Swimming Queensland's All-Comers record list and have
+NOT been invented as SwimCloud races. The record publication does not
+establish each heat/final round, so Round is recorded as TIM (unspecified).
+The source file is update/input/queensland_age12_historical_2024.csv.
+
+The two included data changes have been APPLIED ALREADY. The one-off command
+below is supplied for audit, recovery or use after restoring an older workbook:
+  cd update
+  python scripts/reconcile_2026_scm_and_queensland_once.py
+It is intentionally NOT part of UPDATE_SITE.bat or REBUILD_NO_ACQUISITION.bat.
+It checks the full official age-group record book before changing any record
+provenance, matches 2024 Queensland swims on swimmer/course/event/date/time,
+and safely skips performances already in the database. Should a matching
+SwimCloud race later appear with a different meet label or round, the normal
+acquisition importer also avoids duplicating these five supplements.
+
+Because the additions are historical, they do not change current NZ records
+or Grayson's current PBs. They DO improve his age-12 LCM progression points,
+the age-year season best and ranked comparisons, and his 2024-onwards
+consistency statistics. The current publication's existing 'as at' date is
+preserved in this narrow data-reconciliation patch to avoid unrelated changes;
+future regular refreshes will set a new date on all pages automatically.
+
+For ALL FUTURE updates, continue obtaining the latest Swimming NZ SCM/LCM
+ratified records and staging genuine changes in record_changes.csv. Review
+Queensland All-Comers, Australian All-Comers and privately compiled world
+age bests separately in update/input/other_record_categories.csv. These
+historical Queensland times should not be manually appended a second time.
