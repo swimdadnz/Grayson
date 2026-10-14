@@ -113,7 +113,17 @@ def import_zip(wb,zpath):
     # Append/update SwimCloud rows from a combined acquisition package. Historical rows are preserved.
     ss=wb['02_Swimmer_Sources']; pmap={str(ss.cell(r,4).value): (ss.cell(r,1).value,ss.cell(r,2).value) for r in range(5,ss.max_row+1) if ss.cell(r,4).value}
     ev=wb['03_Events']; em={(ev.cell(r,2).value,int(ev.cell(r,3).value),ev.cell(r,4).value):ev.cell(r,1).value for r in range(5,ev.max_row+1) if ev.cell(r,1).value}
-    sw=wb['04_Swims']; pairs={(str(sw.cell(r,5).value),str(sw.cell(r,6).value)) for r in range(5,sw.max_row+1) if sw.cell(r,5).value and sw.cell(r,6).value}; dups={str(sw.cell(r,30).value) for r in range(5,sw.max_row+1) if sw.cell(r,30).value}; mx=max(int(str(sw.cell(r,1).value)[2:]) for r in range(5,sw.max_row+1) if str(sw.cell(r,1).value).startswith('SM'))
+    sw=wb['04_Swims']
+    # Five certified 2024 Queensland swims were supplemented once because they were
+    # missing in SwimCloud. If SwimCloud later publishes the same results, do not
+    # duplicate them merely because the displayed meet or round differs.
+    qld_supplements={(str(sw.cell(i,3).value), str(sw.cell(i,13).value),
+                      str(sw.cell(i,16).value), dval(sw.cell(i,7).value).isoformat(),
+                      round(float(sw.cell(i,18).value),2))
+                     for i in range(5,sw.max_row+1)
+                     if sw.cell(i,4).value=='Swimming Queensland All-Comers records'
+                     and sw.cell(i,7).value and sw.cell(i,18).value is not None}
+    pairs={(str(sw.cell(r,5).value),str(sw.cell(r,6).value)) for r in range(5,sw.max_row+1) if sw.cell(r,5).value and sw.cell(r,6).value}; dups={str(sw.cell(r,30).value) for r in range(5,sw.max_row+1) if sw.cell(r,30).value}; mx=max(int(str(sw.cell(r,1).value)[2:]) for r in range(5,sw.max_row+1) if str(sw.cell(r,1).value).startswith('SM'))
     with tempfile.TemporaryDirectory() as td:
         with zipfile.ZipFile(zpath) as z:z.extractall(td)
         for fp in Path(td).rglob('*.json'):
@@ -131,6 +141,7 @@ def import_zip(wb,zpath):
                 c=COURSE.get(str(rr.get('eventcourse'))); di=int(rr.get('eventdistance')); st=STROKE.get(str(rr.get('eventstroke')))
                 if (c,di,st) not in em: continue
                 dd=dval(rr.get('dateofswim')); meet=str(rr.get('name') or ''); rnd=str(rr.get('eventround') or 'TIM'); ll=lead(rr); tt=float(rr.get('eventtime')); dk=dup(nm,dd,c,di,st,tt,meet,rnd,ll)
+                if (nm,c,f'{di} {st}',dd.isoformat(),round(tt,2)) in qld_supplements:continue
                 if dk in dups: continue
                 row=sw.max_row+1
                 for col in range(1,sw.max_column+1): sw.cell(row,col)._style=copy(sw.cell(5,col)._style)
