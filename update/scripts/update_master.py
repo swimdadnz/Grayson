@@ -42,16 +42,17 @@ def cv(name,x,y,g):
     return float(np.mean(e)) if e else None
 def analyze(wb):
     ws=wb['01_Swimmers']; people=[]; dob={}
+    estimated_names={str(rr[0]) for rr in wb['Age_Estimation_QA'].iter_rows(min_row=2,values_only=True) if rr[0] and 'Estimated DOB' in str(rr[5])} if 'Age_Estimation_QA' in wb.sheetnames else set()
     for r in range(5,ws.max_row+1):
         if not ws.cell(r,2).value: continue
-        nm=ws.cell(r,2).value; dob[nm]=dval(ws.cell(r,5).value); people.append({'id':ws.cell(r,1).value,'name':nm,'group':ws.cell(r,6).value,'public':ws.cell(r,9).value=='YES'})
+        nm=ws.cell(r,2).value; dob[nm]=dval(ws.cell(r,5).value); people.append({'id':ws.cell(r,1).value,'name':nm,'group':ws.cell(r,6).value,'nation':ws.cell(r,7).value or '—','dobEstimated':nm in estimated_names,'public':ws.cell(r,9).value=='YES'})
     prof=Counter(); ss=wb['02_Swimmer_Sources']
     for r in range(5,ss.max_row+1): prof[ss.cell(r,2).value]+=1
     sw=wb['04_Swims']; rec=[]
     for r in range(5,sw.max_row+1):
         n=sw.cell(r,3).value; t=sw.cell(r,18).value
         if not n or t in (None,''): continue
-        dd=dval(sw.cell(r,7).value); x={'row':r,'swimmer_id':sw.cell(r,2).value,'name':n,'date':dd,'meet':str(sw.cell(r,8).value or ''),'meet_id':str(sw.cell(r,9).value or ''),'round':str(sw.cell(r,11).value or 'TIM'),'course':sw.cell(r,13).value,'distance':int(sw.cell(r,14).value),'stroke':sw.cell(r,15).value,'event':sw.cell(r,16).value,'event_id':sw.cell(r,17).value,'time':float(t),'source':str(sw.cell(r,4).value or 'SwimCloud'),'relay':sw.cell(r,22).value=='YES','legal':sw.cell(r,23).value=='YES'}; x['age']=(dd-dob[n]).days/DEN; x['rorder']=ro(x['round'],x['relay']); rec.append(x)
+        dd=dval(sw.cell(r,7).value); x={'row':r,'swimmer_id':sw.cell(r,2).value,'name':n,'date':dd,'meet':str(sw.cell(r,8).value or ''),'meet_id':str(sw.cell(r,9).value or ''),'round':str(sw.cell(r,11).value or 'TIM'),'course':sw.cell(r,13).value,'distance':int(sw.cell(r,14).value),'stroke':sw.cell(r,15).value,'event':sw.cell(r,16).value,'event_id':sw.cell(r,17).value,'time':float(t),'source':str(sw.cell(r,4).value or 'SwimCloud'),'relay':sw.cell(r,22).value=='YES','legal':sw.cell(r,23).value=='YES','source_age':int(m.group(1)) if (m:=re.search(r'AUS2026\|AGE(\d+)',str(sw.cell(r,6).value or ''))) else None}; x['age']=(dd-dob[n]).days/DEN; x['rorder']=ro(x['round'],x['relay']); rec.append(x)
     gr=sorted([x for x in rec if x['name']=='Grayson Coulter' and x['legal']],key=lambda x:(x['date'],x['rorder'],x['row'])); prior=defaultdict(list)
     for x in gr:
         p=sum(t<x['time']-1e-12 for t in prior[x['event_id']]); x['top5']=p<5; x['top10']=p<10; prior[x['event_id']].append(x['time'])
@@ -80,9 +81,9 @@ def public(wb):
         k=f'{c}|{e}'; arr=[]
         for p in people:
             if not p['public']: continue
-            pts=sorted([x for x in rec if x['name']==p['name'] and x['event_id']==eid and x['legal'] and x['age']<21],key=lambda x:(x['date'],x['rorder'],x['row'])); arr.append({'id':p['id'],'name':p['name'],'group':p['group'],'points':[{'age':round(x['age'],4),'timeSeconds':x['time'],'timeDisplay':fmt(x['time']),'meet':x['meet'],'round':x['round'],'relayLeadOff':x['relay'],'year':x['date'].year,'source':x['source']} for x in pts]})
+            pts=sorted([x for x in rec if x['name']==p['name'] and x['event_id']==eid and x['legal'] and x['age']<21],key=lambda x:(x['date'],x['rorder'],x['row'])); arr.append({'id':p['id'],'name':p['name'],'group':p['group'],'points':[{'age':round(x['age'],4),'timeSeconds':x['time'],'timeDisplay':fmt(x['time']),'meet':x['meet'],'round':x['round'],'relayLeadOff':x['relay'],'year':x['date'].year,'source':x['source'],'ageGroup':x['source_age'] if x['source_age'] is not None else int(x['age']),'ageEstimated':p['dobEstimated']} for x in pts]})
         series[k]=arr
-    (DATA/'progression.json').write_text(json.dumps({'asOf':asof,'status':'ready','ageScope':'performances before exact age 21.0 (through age 20)','swimmers':[{'id':p['id'],'name':p['name'],'group':p['group'],'sourceProfiles':prof[p['name']]} for p in people if p['public']],'events':[{'course':c,'event':e,'key':f'{c}|{e}'} for c,e,_ in req],'series':series,'notes':['Swimming Australia 2026 published boys Top 10 records are one-off supplements; Ian Thorpe full SwimCloud history has not been acquired.','Grayson Coulter combines two SwimCloud profiles into one canonical swimmer.','Public JSON omits dates of birth. Exact ages are calculated privately using 365.2425 days per year.']},indent=2),encoding='utf-8')
+    (DATA/'progression.json').write_text(json.dumps({'asOf':asof,'status':'ready','ageScope':'performances before exact age 21.0 (through age 20)','swimmers':[{'id':p['id'],'name':p['name'],'group':p['group'],'nation':p['nation'],'dobEstimated':p['dobEstimated'],'sourceProfiles':prof[p['name']]} for p in people if p['public']],'events':[{'course':c,'event':e,'key':f'{c}|{e}'} for c,e,_ in req],'series':series,'notes':['Swimming Australia 2026 published boys Top 10 records are one-off supplements; Ian Thorpe full SwimCloud history has not been acquired.','Grayson Coulter combines two SwimCloud profiles into one canonical swimmer.','Birth dates never appear in public JSON; some Australian athletes have DOB estimates, flagged individually. The published Australian record age governs age-year best tables.']},indent=2),encoding='utf-8')
     (DATA/'consistency.json').write_text(json.dumps({'asOf':asof,'status':'ready','analysisStart':'2024-01-01','summary':[{k:v for k,v in r.items() if k not in ('top5','top5Pct')} for r in summary],'trends':trends,'modelCandidates':MODELS,'scopeNote':'Top-10 counts cover every Grayson event/course captured since 1 January 2024. Trend charts remain limited to the eight requested event-course combinations.','dataNotes':['Equal times are not counted as faster.','Relay lead-offs are treated as valid event swims.']},indent=2),encoding='utf-8')
     # records from workbook
     rb=wb['05_Record_Benchmarks']; counts={'male':defaultdict(lambda:{'SCM':0,'LCM':0}),'female':defaultdict(lambda:{'SCM':0,'LCM':0})}; tops={'male':[],'female':[]}
@@ -121,7 +122,7 @@ def import_zip(wb,zpath):
                       str(sw.cell(i,16).value), dval(sw.cell(i,7).value).isoformat(),
                       round(float(sw.cell(i,18).value),2))
                      for i in range(5,sw.max_row+1)
-                     if sw.cell(i,4).value=='Swimming Queensland All-Comers records'
+                     if sw.cell(i,4).value in ('Swimming Queensland All-Comers records','Swimming Australia Age All-Time Top 10')
                      and sw.cell(i,7).value and sw.cell(i,18).value is not None}
     pairs={(str(sw.cell(r,5).value),str(sw.cell(r,6).value)) for r in range(5,sw.max_row+1) if sw.cell(r,5).value and sw.cell(r,6).value}; dups={str(sw.cell(r,30).value) for r in range(5,sw.max_row+1) if sw.cell(r,30).value}; mx=max(int(str(sw.cell(r,1).value)[2:]) for r in range(5,sw.max_row+1) if str(sw.cell(r,1).value).startswith('SM'))
     with tempfile.TemporaryDirectory() as td:
@@ -242,7 +243,7 @@ def refresh_analysis_sheets(wb):
     gscm=sum(1 for r in range(5,rb.max_row+1) if rb.cell(r,2).value=='SCM' and 'Grayson Coulter' in [x.strip() for x in str(rb.cell(r,6).value or '').split(' / ')]);glcm=sum(1 for r in range(5,rb.max_row+1) if rb.cell(r,2).value=='LCM' and 'Grayson Coulter' in [x.strip() for x in str(rb.cell(r,6).value or '').split(' / ')])
     for r in range(5,qa.max_row+1):
         for c in range(1,qa.max_column+1):qa.cell(r,c).value=None
-    checks=[('Canonical swimmers',len(people),19,'PASS' if len(people)==19 else 'FAIL','Grayson has two source profiles but one canonical swimmer.'),('Source profiles',sum(prof.values()),20,'PASS' if sum(prof.values())==20 else 'FAIL',None),('Swimmer ID referential integrity',bad,0,'PASS' if bad==0 else 'FAIL',None),('Normalized swims',len(rec),'>= 2,987','PASS' if len(rec)>=2987 else 'REVIEW',None),('Grayson all-event rows',len(gr),'>= 247','PASS' if len(gr)>=247 else 'REVIEW',None),('Grayson consistency-window swims',len(win),'>= 216','PASS' if len(win)>=216 else 'REVIEW','1 Jan 2024 through current dataset.'),('Grayson event/course combinations since 2024',len(summary),'>= 20','PASS' if len(summary)>=20 else 'REVIEW',None),('Grayson current NZ age records - SCM',gscm,15,'PASS' if gscm==15 else 'REVIEW',None),('Grayson current NZ age records - LCM',glcm,14,'PASS' if glcm==14 else 'REVIEW',None)]
+    checks=[('Canonical swimmers',len(people),31,'PASS' if len(people)==31 else 'FAIL','Grayson has two source profiles but one canonical swimmer.'),('Source profiles and published reference entries',sum(prof.values()),32,'PASS' if sum(prof.values())>=32 else 'FAIL',None),('Swimmer ID referential integrity',bad,0,'PASS' if bad==0 else 'FAIL',None),('Normalized swims',len(rec),'>= 2,987','PASS' if len(rec)>=2987 else 'REVIEW',None),('Grayson all-event rows',len(gr),'>= 247','PASS' if len(gr)>=247 else 'REVIEW',None),('Grayson consistency-window swims',len(win),'>= 216','PASS' if len(win)>=216 else 'REVIEW','1 Jan 2024 through current dataset.'),('Grayson event/course combinations since 2024',len(summary),'>= 20','PASS' if len(summary)>=20 else 'REVIEW',None),('Grayson current NZ age records - SCM',gscm,15,'PASS' if gscm==15 else 'REVIEW',None),('Grayson current NZ age records - LCM',glcm,14,'PASS' if glcm==14 else 'REVIEW',None)]
     for i,row in enumerate(checks,start=5):
         if i>5:_copy_style(qa,5,i,5)
         for cc,v in enumerate(row,1):qa.cell(i,cc).value=v
