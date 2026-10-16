@@ -15,3 +15,8 @@
 /input/profiles.csv
 /input/grayson_profiles.csv
 /input/Progression_comparison_swimmers.xlsx
+
+# Newly added pending source IDs and private date-of-birth estimates.
+/input/new_swimcloud_profiles_pending.csv
+/scripts/swimcloud_api_output_extra_*/
+/scripts/SwimCloud_API_Output_extra_*.zip
