@@ -32,7 +32,7 @@ UPDATE TOOLKIT - WHERE IT LIVES
 -------------------------------
 Everything needed for LOCAL updates is packaged in the update/ subfolder:
   update/Grayson_Swim_Site_Master.xlsx      PRIVATE source workbook
-  update/input/profiles.csv                 19 SwimCloud source profiles
+  update/input/profiles.csv                 20 routine comparison profiles (including corrected Ayden Tan)
   update/input/grayson_profiles.csv         Grayson's two profiles
   update/input/Progression_comparison_swimmers.xlsx  comparison roster/DOBs
   update/input/NZ_age_group_margins_review.xlsx       prior benchmark input
@@ -506,3 +506,76 @@ DOB audit worksheet extracts or other birth-date source materials to a
 public Git repository. Changes to Git ignore rules do not remove files
 previously committed to history. Keep your source master/update inputs in a
 local or private repository; publish progression.html and assets/flags only.
+
+
+OCTOBER 18, 2026 — FOUR SWIMCLOUD PROFILES AND GOLDEN BOYS (CURRENT)
+------------------------------------------------------------------
+This section supersedes older roster/category counts and acquisition notes.
+The refreshed PRIVATE workbook has 55 canonical swimmers and 6,005 normalized
+performances. Progression publicly compares 49 swimmers; 6 remain excluded for
+previously documented source, age or scope limitations.
+
+AYDEN TAN: INCORRECT SWIMCLOUD PROFILE REPLACED
+  Old profile ID 1498118 (incorrect person): 26 previously attributed swims
+  RETIRED from Ayden's fact rows and preserved in the private workbook sheet
+  12_Ayden_Profile_Correction for traceability. Do NOT restore these results.
+  Correct profile ID 964316: 68 swims newly acquired from the verified ID.
+  The master has a single Ayden canonical swimmer (not two). The source mapping
+  and the extra-acquisition pending profile CSV now point ONLY to ID 964316.
+  update/input/profiles.csv also includes the corrected Ayden as a current star
+  for future routine eight-event SwimCloud refreshes. Never use ID 1498118 for
+  Ayden again. His DOB remains an age-estimation from Swim Standards; the
+  supplied date in the roster is within its previously recorded narrow range.
+
+THREE NEW NEW ZEALAND SWIMMERS
+  Michael Pickett (ID 674886), Cameron Gray (ID 523365), Carter Swift
+  (ID 401459) have been added as Other fast buggers, with the DOBs supplied
+  by the user in update/input/four_swimmer_profiles.csv. Their DOBs have not
+  been independently corroborated in this import. Their years/ages are
+  calculated from those supplied DOBs in the PRIVATE master only.
+  34, 144 and 146 raw SwimCloud race entries were captured, respectively;
+  four Carter Swift results were marked Exhibition and are excluded from
+  competitive rankings. All 392 source race IDs are retained in a private
+  audit sheet (13_Four_Swimmer_Import_Audit), including excluded races.
+  Those older NZ profiles are NOT part of the routine age-group-star poll.
+
+SWIMMER GROUPS (PROGRESSION SELECTOR IN THIS ORDER)
+  1 Historical champions
+  2 Golden boys (NEW): Duncan Scott, Josh Liendo, Egor Kornev,
+    Luca Urlando, Flynn Southam, Lewis Clareburt, Mack Horton, Samuel Short
+  3 Current age group stars (including Grayson and corrected Ayden)
+  4 Other fast buggers (now includes Kosei Kato, Koki Tanaka, Luke Hobson,
+    and Michael Pickett, Cameron Gray, Carter Swift)
+  All sections are alphabetical and use existing flag images and country codes.
+  The dark-blue age-ranked table header and age-best Year column persist.
+
+REPEATABLE RECOVERY / REFRESH
+  The October 18 acquisition is ALREADY IN THE SUPPLIED MASTER WORKBOOK.
+  It must not be appended again. For controlled recovery from an old workbook:
+
+    python update/scripts/reconcile_four_swimmers_20261018_once.py PATH_TO_ACQUISITION_ZIP
+
+  The script reads update/input/four_swimmer_profiles.csv, retires any old
+  Ayden-1498118 swims, maps the new source profiles, imports legal, non-
+  exhibition event races, preserves prior Japanese and Australian records,
+  recalculates the analysis sheets, and writes private acquisition/audit rows.
+  Repeat-import testing with the same raw ZIP appended ZERO further races.
+
+  For ongoing normal SwimCloud refreshes use the existing UPDATE_SITE.bat,
+  which reads update/input/profiles.csv (now 20 profiles, including the
+  corrected Ayden ID). Other fast buggers remain fixed unless a separate
+  targeted acquisition is explicitly requested. Never overwrite the master
+  with a raw SwimCloud-only dataset; import/deduplicate against the existing
+  historical records, including one-off Australian/SEIKO additions.
+
+  The current Progression HTML is fully portable/offline. It does not need
+  the private master workbook in a public GitHub repository. The new root
+  Progression HTML and source_template contain the group and ranking layout;
+  public flags in assets/flags/ remain as previously delivered.
+
+PUBLISHING SAFETY: The master workbook and the three input CSVs in this
+update include exact or estimated swimmer DOBs, some for minors. They must
+remain on your local system or a PRIVATE repository. The supplied update/
+.gitignore prevents new normal commits but does not erase Git history; if
+sensitive files are tracked already, untrack and consider history cleanup.
+Do not upload the original acquisition ZIP to the public site.
