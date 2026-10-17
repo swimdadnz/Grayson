@@ -28,3 +28,8 @@
 
 # One-off replay script itself embeds historical DOBs used for age matching.
 /scripts/import_seiko_japan_2026_once.py
+
+# October 2026 four-profile correction; CSV carries birth dates (minors).
+/input/four_swimmer_profiles.csv
+/incoming_swimcloud/SwimCloud_API_Output_four_*.zip
+/scripts/*Output_four_*.zip
