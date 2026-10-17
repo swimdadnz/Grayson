@@ -149,6 +149,9 @@ def import_zip(wb,zpath):
             for rr in arr:
                 rid=str(rr.get('id'))
                 if (pid,rid) in pairs: continue
+                # Exhibition or illegal races are not competitive individual swims.
+                if not rr.get('legal', True) or rr.get('exhibition', False): continue
+                if str(rr.get('swimmer_id')) != pid: continue
                 c=COURSE.get(str(rr.get('eventcourse'))); di=int(rr.get('eventdistance')); st=STROKE.get(str(rr.get('eventstroke')))
                 if (c,di,st) not in em: continue
                 dd=dval(rr.get('dateofswim')); meet=str(rr.get('name') or ''); rnd=str(rr.get('eventround') or 'TIM'); ll=lead(rr); tt=float(rr.get('eventtime')); dk=dup(nm,dd,c,di,st,tt,meet,rnd,ll)
@@ -253,7 +256,7 @@ def refresh_analysis_sheets(wb):
     gscm=sum(1 for r in range(5,rb.max_row+1) if rb.cell(r,2).value=='SCM' and 'Grayson Coulter' in [x.strip() for x in str(rb.cell(r,6).value or '').split(' / ')]);glcm=sum(1 for r in range(5,rb.max_row+1) if rb.cell(r,2).value=='LCM' and 'Grayson Coulter' in [x.strip() for x in str(rb.cell(r,6).value or '').split(' / ')])
     for r in range(5,qa.max_row+1):
         for c in range(1,qa.max_column+1):qa.cell(r,c).value=None
-    checks=[('Canonical swimmers',len(people),52,'PASS' if len(people)==52 else 'FAIL','Grayson has two source profiles but one canonical swimmer.'),('Source profiles and published reference entries',sum(prof.values()),'>= 52','PASS' if sum(prof.values())>=52 else 'FAIL',None),('Swimmer ID referential integrity',bad,0,'PASS' if bad==0 else 'FAIL',None),('Normalized swims',len(rec),'>= 2,987','PASS' if len(rec)>=2987 else 'REVIEW',None),('Grayson all-event rows',len(gr),'>= 247','PASS' if len(gr)>=247 else 'REVIEW',None),('Grayson consistency-window swims',len(win),'>= 216','PASS' if len(win)>=216 else 'REVIEW','1 Jan 2024 through current dataset.'),('Grayson event/course combinations since 2024',len(summary),'>= 20','PASS' if len(summary)>=20 else 'REVIEW',None),('Grayson current NZ age records - SCM',gscm,15,'PASS' if gscm==15 else 'REVIEW',None),('Grayson current NZ age records - LCM',glcm,14,'PASS' if glcm==14 else 'REVIEW',None)]
+    checks=[('Canonical swimmers',len(people),'>= 55','PASS' if len(people)>=55 else 'FAIL','Grayson has two source profiles but one canonical swimmer.'),('Source profiles and published reference entries',sum(prof.values()),'>= 55','PASS' if sum(prof.values())>=55 else 'FAIL',None),('Swimmer ID referential integrity',bad,0,'PASS' if bad==0 else 'FAIL',None),('Normalized swims',len(rec),'>= 2,987','PASS' if len(rec)>=2987 else 'REVIEW',None),('Grayson all-event rows',len(gr),'>= 247','PASS' if len(gr)>=247 else 'REVIEW',None),('Grayson consistency-window swims',len(win),'>= 216','PASS' if len(win)>=216 else 'REVIEW','1 Jan 2024 through current dataset.'),('Grayson event/course combinations since 2024',len(summary),'>= 20','PASS' if len(summary)>=20 else 'REVIEW',None),('Grayson current NZ age records - SCM',gscm,15,'PASS' if gscm==15 else 'REVIEW',None),('Grayson current NZ age records - LCM',glcm,14,'PASS' if glcm==14 else 'REVIEW',None)]
     for i,row in enumerate(checks,start=5):
         if i>5:_copy_style(qa,5,i,5)
         for cc,v in enumerate(row,1):qa.cell(i,cc).value=v

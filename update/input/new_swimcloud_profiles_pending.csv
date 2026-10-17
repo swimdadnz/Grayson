@@ -1,14 +1,32 @@
-﻿Swimmer,SwimmerID,DOB,Group,SwimCloudURL,DOBStatus,EligibleDOBStart,EligibleDOBEnd,Notes
-Samuel Short,,2003-09-17,Historical champion,,Published DOB; checked against age-record range,2003-09-13,2003-11-26,Fill verified SwimCloud URL and numeric ID before running separate one-off acquisition; do not use guessed profile IDs.
-Mack Horton,,1996-04-25,Historical champion,,Published DOB; checked against age-record range,1996-04-19,1996-08-23,Fill verified SwimCloud URL and numeric ID before running separate one-off acquisition; do not use guessed profile IDs.
-Elijah Winnington,,2000-05-05,Historical champion,,Published DOB; checked against age-record range,2000-04-22,2000-08-23,Fill verified SwimCloud URL and numeric ID before running separate one-off acquisition; do not use guessed profile IDs.
-Hantang Wang,,2011-12-09,Current age group star,,Estimated DOB from Australian Top 10 age/date constraints,2011-09-13,2012-03-06,Fill verified SwimCloud URL and numeric ID before running separate one-off acquisition; do not use guessed profile IDs.
-Koa Stotz,,2010-12-08,Current age group star,,Estimated DOB from Australian Top 10 age/date constraints,2010-08-08,2011-04-10,Fill verified SwimCloud URL and numeric ID before running separate one-off acquisition; do not use guessed profile IDs.
-Lincoln Wearing,,2009-12-15,Current age group star,,Estimated DOB from Australian Top 10 age/date constraints,2009-08-21,2010-04-10,Fill verified SwimCloud URL and numeric ID before running separate one-off acquisition; do not use guessed profile IDs.
-Lukas Dunn,,2009-06-14,Current age group star,,Estimated DOB from Australian Top 10 age/date constraints,2009-04-12,2009-08-17,Fill verified SwimCloud URL and numeric ID before running separate one-off acquisition; do not use guessed profile IDs.
-Andre Labara,,2011-01-28,Current age group star,,Estimated DOB from Australian Top 10 age/date constraints,2010-08-18,2011-07-10,Fill verified SwimCloud URL and numeric ID before running separate one-off acquisition; do not use guessed profile IDs.
-Jayden Hadler,,1993-09-23,Other fast buggers,,Published DOB; checked against age-record range,1993-09-21,1993-10-25,Fill verified SwimCloud URL and numeric ID before running separate one-off acquisition; do not use guessed profile IDs.
-Thomas Hauck,,2003-04-17,Other fast buggers,,Estimated DOB from Australian Top 10 age/date constraints,2002-12-16,2003-08-18,Fill verified SwimCloud URL and numeric ID before running separate one-off acquisition; do not use guessed profile IDs.
-Alexander Graham,,1995-04-28,Other fast buggers,,Published DOB; checked against age-record range,1995-04-27,1995-08-07,Fill verified SwimCloud URL and numeric ID before running separate one-off acquisition; do not use guessed profile IDs.
-Te Haumi Maxwell,,1994-08-15,Other fast buggers,,Published DOB; checked against age-record range,1994-08-09,1994-09-09,Fill verified SwimCloud URL and numeric ID before running separate one-off acquisition; do not use guessed profile IDs.
-Ian Thorpe,939756,1982-10-13,Historical champion,https://www.swimcloud.com/swimmer/939756/times/,Published DOB,,,"Extra data acquisition, not in regular 19-profile refresh."
+﻿Swimmer,SwimmerID,DOB,Group,CountryCode,SwimCloudURL,DOBStatus,EligibleDOBStart,EligibleDOBEnd,Notes
+Samuel Short,700178,2003-09-17,Historical champion,AUS,https://www.swimcloud.com/swimmer/700178/times/,Published DOB; checked against age-record range,,,
+Elijah Winnington,672318,2000-05-05,Historical champion,AUS,https://www.swimcloud.com/swimmer/672318/times/,Published DOB; checked against age-record range,,,
+Hantang Wang,3670029,2011-12-09,Current age group star,AUS,https://www.swimcloud.com/swimmer/3670029/times/,Estimated DOB from Australian Top 10 age/date constraints,2011-09-13,2012-03-06,
+Koa Stotz,3290836,2010-12-08,Current age group star,AUS,https://www.swimcloud.com/swimmer/3290836/times/,Estimated DOB from Australian Top 10 age/date constraints,2010-08-08,2011-04-10,
+Lincoln Wearing,3634893,2009-12-15,Current age group star,AUS,https://www.swimcloud.com/swimmer/3634893/times/,Estimated DOB from Australian Top 10 age/date constraints,2009-08-21,2010-04-10,
+Lukas Dunn,3562408,2009-06-14,Current age group star,AUS,https://www.swimcloud.com/swimmer/3562408/times/,Estimated DOB from Australian Top 10 age/date constraints,2009-04-12,2009-08-17,
+Andre Labara,3639731,2011-01-28,Current age group star,AUS,https://www.swimcloud.com/swimmer/3639731/times/,Estimated DOB from Australian Top 10 age/date constraints,2010-08-18,2011-07-10,
+Jayden Hadler,419979,1993-09-23,Other fast buggers,AUS,https://www.swimcloud.com/swimmer/419979/times/,Published DOB; checked against age-record range,,,
+Thomas Hauck,814345,2003-04-17,Other fast buggers,AUS,https://www.swimcloud.com/swimmer/814345/times/,Estimated DOB from Australian Top 10 age/date constraints,2002-12-16,2003-08-18,
+Alexander Graham,505319,1995-04-28,Other fast buggers,AUS,https://www.swimcloud.com/swimmer/505319/times/,Published DOB; checked against age-record range,,,
+Ian Thorpe,939756,1982-10-13,Historical champion,AUS,https://www.swimcloud.com/swimmer/939756/times/,Published DOB,,,
+Riku Hamada,3645670,2011-09-07,Current age group star,JPN,https://www.swimcloud.com/swimmer/3645670/times/,Sourced DOB,,,
+Akaru Nikkawa,3646379,2011-09-26,Current age group star,JPN,https://www.swimcloud.com/swimmer/3646379/times/,Sourced DOB,,,
+Akira Ozawa,3645673,,Current age group star,JPN,https://www.swimcloud.com/swimmer/3645673/times/,Unknown - verify or infer after acquisition,,,
+Charlie Phipps,3387278,,Current age group star,GBR,https://www.swimcloud.com/swimmer/3387278/times/,Unknown - verify or infer after acquisition,,,
+Hayden Sanders,2361858,,Current age group star,GBR,https://www.swimcloud.com/swimmer/2361858/times/,Unknown - verify or infer after acquisition,2010-09-01,2011-08-31,
+Mihailo Vuckovic,1922444,,Current age group star,GBR,https://www.swimcloud.com/swimmer/1922444/times/,Unknown - verify or infer after acquisition,2012-01-01,2013-12-31,
+Jude Burkhart,2862182,2011-11-07,Current age group star,USA,https://www.swimcloud.com/swimmer/2862182/times/,Estimated DOB from Swim Standards,2011-10-31,2011-11-14,
+Kai Joyner,2692604,2010-05-17,Current age group star,USA,https://www.swimcloud.com/swimmer/2692604/times/,Estimated DOB from Swim Standards,2010-05-16,2010-05-19,
+Elliot Leasure,1636530,2011-10-06,Current age group star,USA,https://www.swimcloud.com/swimmer/1636530/times/,Estimated DOB from Swim Standards,2011-10-03,2011-10-10,
+Sheldon Lamb,2806785,2012-04-03,Current age group star,USA,https://www.swimcloud.com/swimmer/2806785/times/,Estimated DOB from Swim Standards,2012-03-13,2012-04-24,
+Ayden Tan,964316,2012-09-20,Current age group star,USA,https://www.swimcloud.com/swimmer/964316/times/,Estimated DOB from Swim Standards,2012-09-17,2012-09-24,Corrected 18 October 2026: previous ID 1498118 retired; do not use.
+Dare Rose,416086,2002-11-01,Other fast buggers,USA,https://www.swimcloud.com/swimmer/416086/times/,Published DOB,,,
+Michael Andrew,166348,1999-04-18,Other fast buggers,USA,https://www.swimcloud.com/swimmer/166348/times/,Published DOB,,,
+Luca Urlando,358699,2002-03-16,Historical champion,USA,https://www.swimcloud.com/swimmer/358699/times/,Published DOB,,,
+Michael Phelps,356597,1985-06-30,Historical champion,USA,https://www.swimcloud.com/swimmer/356597/times/,Published DOB,,,
+Maximus Williamson,1626199,2006-09-04,Other fast buggers,USA,https://www.swimcloud.com/swimmer/1626199/times/,Published DOB,,,
+Josh Liendo,661593,2002-08-20,Historical champion,CAN,https://www.swimcloud.com/swimmer/661593/times/,Published DOB,,,
+Michael Pickett,674886,17/08/2002,Other fast buggers,NZL,https://www.swimcloud.com/swimmer/674886/times/,DOB to verify before publication,,,Enter SwimCloud ID and URL. Category for acquisition only; final page classification to confirm.
+Cameron Gray,523365,13/08/2003,Other fast buggers,NZL,https://www.swimcloud.com/swimmer/523365/times/,DOB to verify before publication,,,Enter SwimCloud ID and URL. Category for acquisition only; final page classification to confirm.
+Carter Swift,401459,1/12/1998,Other fast buggers,NZL,https://www.swimcloud.com/swimmer/401459/times/,DOB to verify before publication,,,Enter SwimCloud ID and URL. Category for acquisition only; final page classification to confirm.

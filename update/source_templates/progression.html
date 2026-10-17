@@ -172,7 +172,7 @@ const swimmerMenu=document.getElementById('swimmer-menu');
 const flagPath=country=>`assets/flags/${String(country||'').toLowerCase()}.png`;
 function flagHTML(country){const c=String(country||'---').toUpperCase();return `<img class="country-flag" alt="" src="${flagPath(c)}" onerror="this.style.visibility='hidden'">`}
 function swimmerDisplay(x){return `${flagHTML(x.nation)} <span class="swimmer-choice-name">${esc(x.name)}${x.dobEstimated?' ≈':''}</span> <span class="country-code">${esc(x.nation||'---')}</span>`}
-const groups=[['Historical champions','Historical champion'],['Current age group stars','Current age group star'],['Other fast buggers','Other fast buggers']];
+const groups=[['Historical champions','Historical champion'],['Golden boys','Golden boys'],['Current age group stars','Current age group star'],['Other fast buggers','Other fast buggers']];
 const idToSwimmer=new Map(progData.swimmers.map(s=>[s.id,s]));
 (function fillSwimmers(){
   swimmerSelect.innerHTML=''; swimmerMenu.innerHTML='';
