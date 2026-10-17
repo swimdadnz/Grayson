@@ -407,3 +407,102 @@ ratified records and staging genuine changes in record_changes.csv. Review
 Queensland All-Comers, Australian All-Comers and privately compiled world
 age bests separately in update/input/other_record_categories.csv. These
 historical Queensland times should not be manually appended a second time.
+
+
+PROGRESSION - TWELVE ADDITIONAL AUSTRALIAN SWIMMERS (OCTOBER 2026)
+------------------------------------------------------------------
+Source file: update/input/new_australian_top10_swims.csv. It contains 123 distinct
+Australian boys age-group All-Time Top 10 performances, LCM and SCM, from the
+Swimming Australia August/September 2026 ranking books. This is a ONE-OFF
+historical input; the normal SwimCloud update does not reload those PDF results.
+The performances are stored in update/Grayson_Swim_Site_Master.xlsx and are
+retained when new SwimCloud acquisitions are merged.
+
+The Progression swimmer chooser has THREE grouped, alphabetical sections:
+Historical champions; Current age group stars (including Grayson); and Other
+fast buggers. Country flag and three-letter nationality are also shown.
+
+Age method: confirmed birth dates were used where independently found; for the
+remaining six athletes a midpoint DOB was estimated from intersection of the
+age-group record dates. Their positions on the x-axis are APPROXIMATE. Published
+Swimming Australia record age, not inferred DOB, controls age-year season-best
+rankings. Audit the private workbook tab Age_Estimation_QA. Never publish DOBs.
+
+FUTURE, SEPARATE SWIMCLOUD ACQUISITION OF ADDED SWIMMERS AND IAN THORPE:
+1. When ready, edit update/input/new_swimcloud_profiles_pending.csv (private),
+   completing the actual SwimCloud URL and matching numeric ID for new swimmers.
+   Do not invent IDs. Ian Thorpe is pre-populated from his known profile.
+2. Run update/RUN_EXTRA_PROFILES_ONCE.bat on Windows. It installs nothing;
+   Chrome/Edge opens and WAITS for you to complete any site verification and
+   press Enter before the acquisition. It uses the eight selected events.
+3. Send the resulting SwimCloud_API_Output_extra_*.zip for reconciliation.
+   Integration/validation of those new profiles into the master swimmer-source
+   map is a separate future step; the output does not automatically overwrite
+   published data, and the routine UPDATE_SITE.bat does not run this script.
+4. Avoid running this frequently; the site may throttle requests.
+
+IMPORTANT: the master XLSX and the pending-profiles CSV contain exact/estimated
+birth dates, including of minors, so neither belongs in a PUBLIC Git commit.
+The 123-row top10 CSV has only results and dates; it contains no birthdays.
+The entire update folder may be maintained privately/local while the five HTML
+pages and assets are public. A .gitignore alone cannot unpublish tracked files.
+
+Official source books:
+LCM: https://swimmingausprd.wpengine.com/wp-content/uploads/Age-All-Time-Top-10-LC-Boys_August-2026.pdf
+SCM: https://swimmingausprd.wpengine.com/wp-content/uploads/Age-All-Time-Top-10-SC-Boys_September-2026.pdf
+
+
+SWIMCLOUD EXTRA ACQUISITION RECONCILIATION (17 OCTOBER 2026)
+--------------------------------------------------------------
+This update incorporates the browser-acquired 28-profile output:
+ update/incoming_swimcloud/SwimCloud_API_Output_extra_20261017_150747.zip
+
+224 event-course calls returned HTTP 200. 78 contained no races; 146 had races.
+There were 2,372 individual race entries. After checking legal status and
+matching existing performances, 2,317 swims were appended, 53 matched the
+existing master history and 2 were rejected from the eligible database.
+The private master contains 48 swimmers / 5,495 individual performances.
+Both Grayson SwimCloud source profiles and the Australian Top 10 / Queensland
+historical additions are preserved. This is a one-off acquisition merge;
+do not import the same ZIP again unless repairing the database.
+
+BIRTH-DATE QUALITY GATE
+-----------------------
+Four swimmers' dates of birth cannot currently be established to a 61-day
+window: Akira Ozawa, Charlie Phipps, Hayden Sanders and Mihailo Vuckovic.
+Their swims and their source profiles are retained in the private master;
+the 01_Swimmers Public Flag is NO and DOB is blank. They are deliberately
+absent from the public Progression chart and ranked age-year tables.
+The DOB_Review_Extra_2026 worksheet documents the evidence and uncertainty.
+Do not assign an arbitrary midpoint DOB: historical SwimCloud swimmerage
+fields conflict for some swimmers. Once independent evidence constrains
+DOB to within 61 days, update 01_Swimmers DOB and Public Flag, then rebuild.
+Other previously established DOB estimates remain labelled as estimates.
+
+COUNTRY FLAGS AND RANKINGS
+--------------------------
+The swimmer selector now uses a keyboard-accessible custom list so country
+flags render consistently on Windows as well as on phones. Each swimmer also
+has a three-letter country code. The age-year ranking table shows the same
+country flag and country code. New local icons are held in assets/flags/.
+Keep that folder with progression.html. No external image service is needed.
+
+NEXT SWIMCLOUD REFRESH
+----------------------
+The workbook has the new canonical swimmer IDs and SwimCloud source IDs.
+The update/scripts/update_master.py importer now accepts Windows or POSIX
+ZIP entry separators, skips race IDs already imported and retains one-off
+historical source swims. For a future run, use the normal acquisition script
+and rebuild only after inspecting the captured response summary.
+The historical 17 October ZIP is already imported; no rerun is necessary.
+The 10_Acquisition_Race_IDs worksheet retains all 2,372 source race IDs,
+including independent matches and discarded records, to make repeated
+imports idempotent. A reimport test confirmed the swim count stays 5,495.
+
+PUBLIC REPOSITORY PRIVACY
+-------------------------
+Do NOT commit update/Grayson_Swim_Site_Master.xlsx, the raw acquisition ZIP,
+DOB audit worksheet extracts or other birth-date source materials to a
+public Git repository. Changes to Git ignore rules do not remove files
+previously committed to history. Keep your source master/update inputs in a
+local or private repository; publish progression.html and assets/flags only.
