@@ -1,0 +1,59 @@
+PROGRESSION REFRESH — VERIFIED JAPANESE SEIKO RESULTS AND AUSTRALIAN DOBs
+17 OCTOBER 2026
+
+WHAT IS INCLUDED / APPLIED
+* 148 source-PDF-verified individual results for Kosei Kato (43), Koki Tanaka
+  (48), Ryunosuke Murata (26), Koki Fujiwara (31). Included 124 freestyle
+  and 24 butterfly swims in the master history; the public Progression page
+  currently charts 100 Fly only, alongside 100/200/400 Free in SCM and LCM.
+* Heats and finals are kept as separate races. Source PDF URLs and page
+  references are carried on swim rows and in 11_SEIKO_Race_Audit.
+* All 148 source result times were previously audited to SEIKO PDF pages.
+  Every entry has a validated 3–5-day meet window; 102 have a PDF printing
+  date and 46 use a documented meet-window midpoint for chart positioning.
+  NONE of the 148 have an independently established exact race date.
+  Do NOT describe SEIKO sample ages as completely exact. Source age-year
+  assignments remain unambiguous because no meet date window crosses the
+  swimmer's birthday. Do not substitute inferred race dates for verified dates.
+* Six Australian date-of-birth revisions applied to the PRIVATE master
+  (Andre Labara, Lukas Dunn, Thomas Hauck, Lincoln Wearing, Hantang Wang,
+  Koa Stotz). Source precision and accepted uncertainty ranges are preserved
+  in the PRIVATE Age_Estimation_QA sheet and excluded source CSV. No DOBs
+  should be copied into publicly tracked update instructions.
+* Seven swimmer categories updated to Other fast buggers: Elijah Winnington,
+  Flynn Southam, Jack Alexy, Jacob Whittle, Lewis Clareburt, Mack Horton,
+  Samuel Short. Riku Hamada, Akaru Nikkawa and Akira Ozawa are retained
+  privately but excluded from public Progression until in scope.
+* Historical Japanese profiles added as SEIKO (NOT SwimCloud). No fake
+  SwimCloud profile IDs, and the recurring refresh does not re-download SEIKO.
+* The ranked age-best header has North Shore dark blue (#0b2b4b), white text.
+  Japan flag is provided at assets/flags/jpn.png for offline laptop rendering.
+
+REBUILD / FUTURE UPDATES
+1. The master workbook ALREADY INCLUDES the 148 Japanese results and six
+   Australian DOB corrections. No extra import is needed now.
+2. For audit or recovery after restoring an older master workbook, run this
+   command exactly once inside update/:
+      python scripts/import_seiko_japan_2026_once.py
+   It has a source-validation step and skips previously imported race IDs.
+3. For subsequent regular updates use your usual UPDATE_SITE.bat, or rebuild
+   without acquisitions via REBUILD_NO_ACQUISITION.bat. The adjusted
+   update_master.py reads private 11_SEIKO_Race_Audit and carries estimated
+   date windows through to the public chart notes and hover tooltips.
+4. The public progression page is an offline HTML: no spreadsheet is needed
+   in the public site. Retain the existing assets/flags/ directory, and add
+   assets/flags/jpn.png if not already present.
+5. The ZIP intentionally changes only progression.html and Japanese flag
+   imagery in the PUBLIC site. None of the other four HTML pages are
+   replacement files in this patch.
+
+PRIVACY AND PROVENANCE
+Keep the workbook and the two new input CSVs in a LOCAL or PRIVATE update
+folder. Both files include actual or estimated dates of birth of minors.
+The supplied update/.gitignore helps prevent NEW commits, but does NOT
+remove tracked files from a public repository or previous Git history.
+Official SEIKO results: https://swim.seiko.co.jp/
+Source PDFs are referenced individually from the CSV and workbook, not
+bundled as bulky PDF attachments. The audit ZIP/report from the prior
+verification step can be retained locally if full source-chain review is
+needed. Japanese result data does not establish comprehensive race histories.
