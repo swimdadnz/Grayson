@@ -20,3 +20,11 @@
 /input/new_swimcloud_profiles_pending.csv
 /scripts/swimcloud_api_output_extra_*/
 /scripts/SwimCloud_API_Output_extra_*.zip
+
+# SEIKO four-swimmer historical audit and Australian birth-date corrections.
+# These source CSVs include exact dates of birth (some of minors).
+/input/SEIKO_four_swimmers_verified_2026.csv
+/input/Australian_DOB_corrections_approved.csv
+
+# One-off replay script itself embeds historical DOBs used for age matching.
+/scripts/import_seiko_japan_2026_once.py
